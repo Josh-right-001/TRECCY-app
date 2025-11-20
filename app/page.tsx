@@ -1,9 +1,22 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
+import { cookies } from "next/headers"
 import Sidebar from "@/components/layout/sidebar"
 import HomeClient from "./home-client"
 
 export default async function Home() {
+  const cookieStore = await cookies()
+  const isGuestMode = cookieStore.get("guest_mode")?.value === "true"
+
+  if (isGuestMode) {
+    return (
+      <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
+        <Sidebar />
+        <HomeClient cards={[]} isGuestMode={true} />
+      </div>
+    )
+  }
+
   const supabase = await createClient()
 
   const {
@@ -24,7 +37,7 @@ export default async function Home() {
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
       <Sidebar />
-      <HomeClient cards={cards || []} />
+      <HomeClient cards={cards || []} isGuestMode={false} />
     </div>
   )
 }
